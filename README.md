@@ -61,21 +61,18 @@ cd nrf54l15-course-code
 
 ### Build and Flash
 
-Each phase is a complete Zephyr application:
+Each phase is a complete Zephyr application. Use VS Code with the nRF Connect extension:
 
-```bash
-# Navigate to solution (or starter)
-cd phase0_raw_adc/solution
-
-# Build
-west build -b nrf54l15dk/nrf54l15/cpuapp
-
-# Flash
-west flash
-
-# View logs (RTT)
-west log
-```
+1. Open **VS Code**
+2. Go to the **nRF Connect** extension panel
+3. Click **Add an existing application** and select the phase folder (e.g., `phase0_raw_adc/starter`)
+4. Click **Add build configuration**
+   - Board: `nrf54l15dk/nrf54l15/cpuapp`
+   - Leave other settings at defaults
+5. Click **Build** (hammer icon)
+6. Connect your DK via USB
+7. Click **Flash** (lightning icon)
+8. View output in the **nRF Terminal** or your preferred serial terminal (115200 baud)
 
 ## Course Access
 
