@@ -151,7 +151,7 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
  */
 static int init_timer(void)
 {
-	nrfx_err_t err;
+	int err;
 
 	/* Connect TIMER22 interrupt (required by nrfx even if unused) */
 	IRQ_CONNECT(DT_IRQN(DT_NODELABEL(timer22)),
@@ -162,8 +162,8 @@ static int init_timer(void)
 	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(1000000);
 
 	err = nrfx_timer_init(&timer_instance, &timer_config, NULL);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("TIMER init failed: 0x%08x", err);
+	if (err != 0) {
+		LOG_ERR("TIMER init failed: %d", err);
 		return -EIO;
 	}
 
@@ -192,7 +192,7 @@ static int init_timer(void)
  */
 static int init_saadc(void)
 {
-	nrfx_err_t err;
+	int err;
 
 	/* Connect SAADC interrupt */
 	IRQ_CONNECT(DT_IRQN(DT_NODELABEL(adc)),
@@ -200,8 +200,8 @@ static int init_saadc(void)
 		    nrfx_isr, nrfx_saadc_irq_handler, 0);
 
 	err = nrfx_saadc_init(DT_IRQ(DT_NODELABEL(adc), priority));
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC init failed: 0x%08x", err);
+	if (err != 0) {
+		LOG_ERR("SAADC init failed: %d", err);
 		return -EIO;
 	}
 
@@ -209,8 +209,8 @@ static int init_saadc(void)
 	channel.channel_config.gain = NRF_SAADC_GAIN1_4;
 
 	err = nrfx_saadc_channels_config(&channel, 1);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC channel config failed: 0x%08x", err);
+	if (err != 0) {
+		LOG_ERR("SAADC channel config failed: %d", err);
 		return -EIO;
 	}
 
@@ -223,21 +223,21 @@ static int init_saadc(void)
 					   NRF_SAADC_RESOLUTION_12BIT,
 					   &adv_config,
 					   saadc_handler);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC advanced mode failed: 0x%08x", err);
+	if (err != 0) {
+		LOG_ERR("SAADC advanced mode failed: %d", err);
 		return -EIO;
 	}
 
 	/* Set up double buffers */
 	err = nrfx_saadc_buffer_set(sample_buffers[0], BUFFER_SIZE);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC buffer[0] set failed: 0x%08x", err);
+	if (err != 0) {
+		LOG_ERR("SAADC buffer[0] set failed: %d", err);
 		return -EIO;
 	}
 
 	err = nrfx_saadc_buffer_set(sample_buffers[1], BUFFER_SIZE);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC buffer[1] set failed: 0x%08x", err);
+	if (err != 0) {
+		LOG_ERR("SAADC buffer[1] set failed: %d", err);
 		return -EIO;
 	}
 
@@ -252,7 +252,7 @@ static int init_saadc(void)
  */
 static int init_dppi(void)
 {
-	nrfx_err_t err;
+	int err;
 
 	/* Get event/task addresses */
 	uint32_t timer_compare_addr = nrfx_timer_compare_event_address_get(
@@ -273,8 +273,8 @@ static int init_dppi(void)
 	/* Connection 1: TIMER COMPARE -> SAADC SAMPLE */
 	err = nrfx_gppi_conn_alloc(timer_compare_addr, saadc_sample_addr,
 				   &gppi_sample_handle);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("GPPI alloc (TIMER->SAADC SAMPLE) failed: 0x%08x", err);
+	if (err != 0) {
+		LOG_ERR("GPPI alloc (TIMER->SAADC SAMPLE) failed: %d", err);
 		return -EIO;
 	}
 	nrfx_gppi_conn_enable(gppi_sample_handle);
@@ -284,8 +284,8 @@ static int init_dppi(void)
 	/* Connection 2: SAADC END -> SAADC START (continuous operation) */
 	err = nrfx_gppi_conn_alloc(saadc_end_addr, saadc_start_addr,
 				   &gppi_start_handle);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("GPPI alloc (SAADC END->START) failed: 0x%08x", err);
+	if (err != 0) {
+		LOG_ERR("GPPI alloc (SAADC END->START) failed: %d", err);
 		return -EIO;
 	}
 	nrfx_gppi_conn_enable(gppi_start_handle);
@@ -350,11 +350,6 @@ int main(void)
 	}
 
 	/* Start the autonomous sampling chain:
-	 * 1. Trigger SAADC to enter ready state
-	 * 2. Enable TIMER to start generating COMPARE events
-	 * From here, everything runs in hardware until we stop it.
-	 */
-	/* Start the autonomous sampling chain:
 	 * 1. mode_trigger() puts the SAADC in ready state
 	 * 2. EVT_READY fires in saadc_handler(), which starts the TIMER
 	 * 3. From there, TIMER COMPARE events trigger samples via DPPI
@@ -362,9 +357,9 @@ int main(void)
 	 * Starting the timer inside EVT_READY (instead of here) ensures
 	 * no DPPI triggers arrive before the SAADC is ready to handle them.
 	 */
-	nrfx_err_t nrfx_err = nrfx_saadc_mode_trigger();
-	if (nrfx_err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC mode trigger failed: 0x%08x", nrfx_err);
+	err = nrfx_saadc_mode_trigger();
+	if (err != 0) {
+		LOG_ERR("SAADC mode trigger failed: %d", err);
 		return -EIO;
 	}
 

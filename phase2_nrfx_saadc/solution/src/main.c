@@ -42,7 +42,7 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 
 int main(void)
 {
-    nrfx_err_t err;
+    int err;
 
     LOG_INF("==========================================");
     LOG_INF("Phase 2: nrfx SAADC Direct Control");
@@ -57,8 +57,8 @@ int main(void)
                 nrfx_isr, nrfx_saadc_irq_handler, 0);
 
     err = nrfx_saadc_init(DT_IRQ(DT_NODELABEL(adc), priority));
-    if (err != NRFX_SUCCESS) {
-        LOG_ERR("SAADC init failed: 0x%x", err);
+    if (err != 0) {
+        LOG_ERR("SAADC init failed: %d", err);
         return -1;
     }
     LOG_INF("SAADC initialized");
@@ -68,8 +68,8 @@ int main(void)
     channel.channel_config.gain = NRF_SAADC_GAIN1_4;
 
     err = nrfx_saadc_channels_config(&channel, 1);
-    if (err != NRFX_SUCCESS) {
-        LOG_ERR("Channel config failed: 0x%x", err);
+    if (err != 0) {
+        LOG_ERR("Channel config failed: %d", err);
         return -1;
     }
     LOG_INF("Channel configured for AIN4 (P1.11)");
@@ -79,15 +79,15 @@ int main(void)
                                       NRF_SAADC_RESOLUTION_12BIT,
                                       NRF_SAADC_OVERSAMPLE_DISABLED,
                                       saadc_handler);
-    if (err != NRFX_SUCCESS) {
-        LOG_ERR("Simple mode set failed: 0x%x", err);
+    if (err != 0) {
+        LOG_ERR("Simple mode set failed: %d", err);
         return -1;
     }
 
     /* Set up sample buffer */
     err = nrfx_saadc_buffer_set(sample_buffer, 1);
-    if (err != NRFX_SUCCESS) {
-        LOG_ERR("Buffer set failed: 0x%x", err);
+    if (err != 0) {
+        LOG_ERR("Buffer set failed: %d", err);
         return -1;
     }
 
@@ -99,8 +99,8 @@ int main(void)
     while (1) {
         /* Trigger a sample */
         err = nrfx_saadc_mode_trigger();
-        if (err != NRFX_SUCCESS) {
-            LOG_ERR("Trigger failed: 0x%x", err);
+        if (err != 0) {
+            LOG_ERR("Trigger failed: %d", err);
             k_msleep(SAMPLE_INTERVAL_MS);
             continue;
         }

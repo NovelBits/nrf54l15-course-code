@@ -42,7 +42,7 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 
 int main(void)
 {
-    nrfx_err_t err;
+    int err;
 
     LOG_INF("==========================================");
     LOG_INF("Phase 2: nrfx SAADC Direct Control");
