@@ -22,6 +22,9 @@ nrf54l15-course-code/
 ├── phase3_timer_dppi/       # Module 4 - Autonomous Sampling (TIMER+DPPI)
 │   ├── starter/
 │   └── solution/
+├── phase4_grtc_idle/        # Module 5 - Idle Mode with GRTC (Burst Sampling)
+│   ├── starter/
+│   └── solution/
 └── lib/
     └── pulse_sensor/        # Shared PulseSensor library
 ```
