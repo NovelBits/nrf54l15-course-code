@@ -89,7 +89,12 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 
 	switch (p_event->type) {
 	case NRFX_SAADC_EVT_READY:
-		LOG_INF("SAADC ready, TIMER-triggered sampling active");
+		/* Start the timer now that SAADC is confirmed ready.
+		 * This ensures no DPPI triggers arrive before the SAADC
+		 * can handle them.
+		 */
+		nrfx_timer_enable(&timer_instance);
+		LOG_INF("SAADC ready, TIMER started — autonomous sampling active");
 		break;
 
 	case NRFX_SAADC_EVT_BUF_REQ:
@@ -349,13 +354,19 @@ int main(void)
 	 * 2. Enable TIMER to start generating COMPARE events
 	 * From here, everything runs in hardware until we stop it.
 	 */
+	/* Start the autonomous sampling chain:
+	 * 1. mode_trigger() puts the SAADC in ready state
+	 * 2. EVT_READY fires in saadc_handler(), which starts the TIMER
+	 * 3. From there, TIMER COMPARE events trigger samples via DPPI
+	 *
+	 * Starting the timer inside EVT_READY (instead of here) ensures
+	 * no DPPI triggers arrive before the SAADC is ready to handle them.
+	 */
 	nrfx_err_t nrfx_err = nrfx_saadc_mode_trigger();
 	if (nrfx_err != NRFX_SUCCESS) {
 		LOG_ERR("SAADC mode trigger failed: 0x%08x", nrfx_err);
 		return -EIO;
 	}
-
-	nrfx_timer_enable(&timer_instance);
 
 	LOG_INF("");
 	LOG_INF("Autonomous sampling started!");

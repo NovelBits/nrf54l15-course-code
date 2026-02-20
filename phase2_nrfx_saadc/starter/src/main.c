@@ -47,12 +47,15 @@ int main(void)
     LOG_INF("Sample rate: %d Hz", SAMPLE_RATE_HZ);
     LOG_INF("");
 
-    /* TODO: Initialize SAADC
-     * Hint: Use IRQ_CONNECT to connect interrupt handler
-     * Then call nrfx_saadc_init()
+    /* TODO 1: Initialize SAADC
+     * Hint: Use IRQ_CONNECT() with nrfx_isr wrapper to connect the interrupt handler:
+     *   IRQ_CONNECT(DT_IRQN(DT_NODELABEL(adc)),
+     *               DT_IRQ(DT_NODELABEL(adc), priority),
+     *               nrfx_isr, nrfx_saadc_irq_handler, 0);
+     * Then call nrfx_saadc_init() with DT_IRQ(DT_NODELABEL(adc), priority)
      */
 
-    /* TODO: Configure SAADC channel for AIN4 (P1.11)
+    /* TODO 2: Configure SAADC channel for AIN4 (P1.11)
      * Hint: Create nrfx_saadc_channel_t struct with:
      * - Gain: NRF_SAADC_GAIN1_4
      * - Reference: NRF_SAADC_REFERENCE_INTERNAL
@@ -61,7 +64,7 @@ int main(void)
      * Then call nrfx_saadc_channels_config()
      */
 
-    /* TODO: Configure simple mode
+    /* TODO 3: Configure simple mode
      * Hint: Use nrfx_saadc_simple_mode_set() with:
      * - Channel mask: BIT(0)
      * - Resolution: NRF_SAADC_RESOLUTION_12BIT
@@ -69,8 +72,8 @@ int main(void)
      * - Event handler: saadc_handler
      */
 
-    /* TODO: Set up sample buffer
-     * Hint: Use nrfx_saadc_buffer_set()
+    /* TODO 4: Set up sample buffer
+     * Hint: Use nrfx_saadc_buffer_set(sample_buffer, 1)
      */
 
     LOG_INF("Starting sampling... Place finger on sensor");
@@ -79,20 +82,20 @@ int main(void)
     uint32_t count = 0;
 
     while (1) {
-        /* TODO: Trigger a sample
-         * Hint: Use nrfx_saadc_mode_trigger()
-         */
-
-        /* TODO: Wait for sample to complete
-         * Hint: Poll sample_ready flag, use k_yield()
-         */
-
-        /* TODO: Log the sample value
-         * Hint: Read from sample_buffer[0]
-         */
-
-        /* TODO: Re-arm buffer for next sample
-         * Hint: Call nrfx_saadc_buffer_set()
+        /* TODO 5: Trigger, wait, log, and re-arm
+         *
+         * a) Trigger a sample with nrfx_saadc_mode_trigger()
+         *
+         * b) Wait for the sample to complete by polling sample_ready
+         *    (use k_yield() in the wait loop)
+         *
+         * c) Reset sample_ready to false
+         *
+         * d) Log the sample: LOG_INF("ADC: %d", sample_buffer[0])
+         *    (log every 10th sample to avoid flooding the console)
+         *
+         * e) Re-arm the buffer with nrfx_saadc_buffer_set(sample_buffer, 1)
+         *    This is required after every completed sample in simple mode.
          */
 
         k_msleep(SAMPLE_INTERVAL_MS);

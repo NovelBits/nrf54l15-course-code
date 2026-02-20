@@ -47,10 +47,10 @@ int main(void)
     LOG_INF("Sample rate: %d Hz", SAMPLE_RATE_HZ);
     LOG_INF("");
 
-    /* Initialize SAADC - nRF54L15 uses simpler init without config struct */
+    /* Initialize SAADC - connect interrupt using nrfx_isr wrapper */
     IRQ_CONNECT(DT_IRQN(DT_NODELABEL(adc)),
                 DT_IRQ(DT_NODELABEL(adc), priority),
-                nrfx_saadc_irq_handler, NULL, 0);
+                nrfx_isr, nrfx_saadc_irq_handler, 0);
 
     err = nrfx_saadc_init(DT_IRQ(DT_NODELABEL(adc), priority));
     if (err != NRFX_SUCCESS) {

@@ -1,15 +1,9 @@
 /*
- * Phase 3: TIMER + DPPI -> SAADC Autonomous Sampling
+ * Phase 3: TIMER + DPPI -> SAADC Autonomous Sampling - STARTER
  *
- * Based on Nordic Academy Lesson 6, Exercise 3 (nRF54L15 variant).
- *
- * This implementation demonstrates fully autonomous ADC sampling using:
- *   TIMER22 COMPARE event -> DPPI channel -> SAADC SAMPLE task
- *   SAADC END event -> DPPI channel -> SAADC START task (continuous)
- *
- * Key advantage over GRTC approach: TIMER has hardware SHORTS
- * (COMPARE -> CLEAR) for automatic periodic operation. The CPU does NOT
- * need to wake up for each sample — only when a full buffer is ready.
+ * Goal: Eliminate CPU involvement in sampling by connecting TIMER22
+ * to the SAADC through DPPI. The CPU only wakes when a full buffer
+ * of 200 samples is ready (once per second).
  *
  * Architecture:
  *   TIMER22 CC[0] fires every 5ms (200 Hz)
@@ -22,9 +16,6 @@
  *
  *   When buffer full (200 samples = 1 second):
  *         SAADC interrupt --> CPU wakes to process buffer
- *
- * CPU wake-ups: 1 per second (buffer full only)
- * vs. GRTC approach: 200 per second (re-arm each compare)
  *
  * Wiring:
  *   Pulse Sensor Signal (S) -> P1.11 (AIN4)
@@ -78,7 +69,7 @@ static nrfx_saadc_channel_t channel = NRFX_SAADC_DEFAULT_CHANNEL_SE(
 	SAADC_INPUT_PIN, SAADC_CHANNEL);
 
 /*
- * SAADC event handler
+ * SAADC event handler (provided as scaffolding)
  *
  * This is the ONLY place the CPU wakes up during sampling.
  * Called once per second when a 200-sample buffer is full.
@@ -89,7 +80,12 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 
 	switch (p_event->type) {
 	case NRFX_SAADC_EVT_READY:
-		LOG_INF("SAADC ready, TIMER-triggered sampling active");
+		/* Start the timer now that SAADC is confirmed ready.
+		 * This ensures no DPPI triggers arrive before the SAADC
+		 * can handle them.
+		 */
+		nrfx_timer_enable(&timer_instance);
+		LOG_INF("SAADC ready, TIMER started — autonomous sampling active");
 		break;
 
 	case NRFX_SAADC_EVT_BUF_REQ:
@@ -140,152 +136,93 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 
 /*
  * Initialize TIMER22 for periodic 200 Hz events
- *
- * Uses hardware SHORTS (COMPARE0 -> CLEAR) so the timer auto-reloads
- * without any CPU involvement. No ISR needed.
  */
 static int init_timer(void)
 {
-	nrfx_err_t err;
-
-	/* Connect TIMER22 interrupt (required by nrfx even if unused) */
-	IRQ_CONNECT(DT_IRQN(DT_NODELABEL(timer22)),
-		    DT_IRQ(DT_NODELABEL(timer22), priority),
-		    nrfx_isr, nrfx_timer_22_irq_handler, 0);
-
-	/* Configure timer: 1 MHz clock, 32-bit counter */
-	nrfx_timer_config_t timer_config = NRFX_TIMER_DEFAULT_CONFIG(1000000);
-
-	err = nrfx_timer_init(&timer_instance, &timer_config, NULL);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("TIMER init failed: 0x%08x", err);
-		return -EIO;
-	}
-
-	/* Set CC[0] for 5ms interval with auto-clear SHORT */
-	uint32_t ticks = nrfx_timer_us_to_ticks(&timer_instance,
-						 SAMPLE_INTERVAL_US);
-
-	nrfx_timer_extended_compare(&timer_instance,
-				    NRF_TIMER_CC_CHANNEL0,
-				    ticks,
-				    NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
-				    false);  /* No interrupt needed */
-
-	LOG_INF("TIMER22 configured: %d us interval (%d ticks at 1 MHz)",
-		SAMPLE_INTERVAL_US, ticks);
-	LOG_INF("  SHORT: COMPARE0 -> CLEAR (hardware auto-reload)");
+	/* TODO 1: Initialize TIMER22
+	 *
+	 * a) Connect the TIMER22 interrupt using IRQ_CONNECT with nrfx_isr wrapper:
+	 *    IRQ_CONNECT(DT_IRQN(DT_NODELABEL(timer22)),
+	 *                DT_IRQ(DT_NODELABEL(timer22), priority),
+	 *                nrfx_isr, nrfx_timer_22_irq_handler, 0);
+	 *
+	 * b) Create a timer config: NRFX_TIMER_DEFAULT_CONFIG(1000000) for 1 MHz clock
+	 *
+	 * c) Initialize with nrfx_timer_init(&timer_instance, &config, NULL)
+	 *
+	 * d) Calculate ticks: nrfx_timer_us_to_ticks(&timer_instance, SAMPLE_INTERVAL_US)
+	 *
+	 * e) Set up periodic compare with auto-clear SHORT:
+	 *    nrfx_timer_extended_compare(&timer_instance,
+	 *                                NRF_TIMER_CC_CHANNEL0,
+	 *                                ticks,
+	 *                                NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK,
+	 *                                false);
+	 */
 
 	return 0;
 }
 
 /*
  * Initialize SAADC for hardware-triggered sampling
- *
- * Identical to Phase 4 GRTC version — the SAADC doesn't care
- * whether the trigger comes from TIMER or GRTC via DPPI.
  */
 static int init_saadc(void)
 {
-	nrfx_err_t err;
+	/* TODO 2: Initialize SAADC in advanced mode with double buffering
+	 *
+	 * a) Connect the SAADC interrupt using IRQ_CONNECT with nrfx_isr wrapper:
+	 *    IRQ_CONNECT(DT_IRQN(DT_NODELABEL(adc)),
+	 *                DT_IRQ(DT_NODELABEL(adc), priority),
+	 *                nrfx_isr, nrfx_saadc_irq_handler, 0);
+	 *
+	 * b) Initialize: nrfx_saadc_init(DT_IRQ(DT_NODELABEL(adc), priority))
+	 *
+	 * c) Set gain: channel.channel_config.gain = NRF_SAADC_GAIN1_4
+	 *    Then configure: nrfx_saadc_channels_config(&channel, 1)
+	 *
+	 * d) Set up advanced mode (external trigger via DPPI):
+	 *    nrfx_saadc_adv_config_t adv_config = NRFX_SAADC_DEFAULT_ADV_CONFIG;
+	 *    adv_config.internal_timer_cc = 0;    // External trigger (DPPI)
+	 *    adv_config.start_on_end = false;     // We use DPPI END->START instead
+	 *    nrfx_saadc_advanced_mode_set(BIT(SAADC_CHANNEL),
+	 *                                 NRF_SAADC_RESOLUTION_12BIT,
+	 *                                 &adv_config, saadc_handler);
+	 *
+	 * e) Set up double buffers:
+	 *    nrfx_saadc_buffer_set(sample_buffers[0], BUFFER_SIZE);
+	 *    nrfx_saadc_buffer_set(sample_buffers[1], BUFFER_SIZE);
+	 */
 
-	/* Connect SAADC interrupt */
-	IRQ_CONNECT(DT_IRQN(DT_NODELABEL(adc)),
-		    DT_IRQ(DT_NODELABEL(adc), priority),
-		    nrfx_isr, nrfx_saadc_irq_handler, 0);
-
-	err = nrfx_saadc_init(DT_IRQ(DT_NODELABEL(adc), priority));
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC init failed: 0x%08x", err);
-		return -EIO;
-	}
-
-	/* Configure channel: AIN4 (P1.11), 1/4 gain for 0-3.6V range */
-	channel.channel_config.gain = NRF_SAADC_GAIN1_4;
-
-	err = nrfx_saadc_channels_config(&channel, 1);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC channel config failed: 0x%08x", err);
-		return -EIO;
-	}
-
-	/* Advanced mode: external trigger via DPPI, no internal timer */
-	nrfx_saadc_adv_config_t adv_config = NRFX_SAADC_DEFAULT_ADV_CONFIG;
-	adv_config.internal_timer_cc = 0;     /* External trigger (DPPI) */
-	adv_config.start_on_end = false;      /* We use DPPI END->START instead */
-
-	err = nrfx_saadc_advanced_mode_set(BIT(SAADC_CHANNEL),
-					   NRF_SAADC_RESOLUTION_12BIT,
-					   &adv_config,
-					   saadc_handler);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC advanced mode failed: 0x%08x", err);
-		return -EIO;
-	}
-
-	/* Set up double buffers */
-	err = nrfx_saadc_buffer_set(sample_buffers[0], BUFFER_SIZE);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC buffer[0] set failed: 0x%08x", err);
-		return -EIO;
-	}
-
-	err = nrfx_saadc_buffer_set(sample_buffers[1], BUFFER_SIZE);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC buffer[1] set failed: 0x%08x", err);
-		return -EIO;
-	}
-
-	LOG_INF("SAADC initialized: 12-bit, AIN4 (P1.11), external trigger via DPPI");
 	return 0;
 }
 
 /*
- * Set up DPPI connections:
- *   1. TIMER22 COMPARE[0] -> SAADC SAMPLE (trigger each sample)
- *   2. SAADC END -> SAADC START (continuous buffer operation)
+ * Set up DPPI connections between peripherals
  */
 static int init_dppi(void)
 {
-	nrfx_err_t err;
-
-	/* Get event/task addresses */
-	uint32_t timer_compare_addr = nrfx_timer_compare_event_address_get(
-		&timer_instance, NRF_TIMER_CC_CHANNEL0);
-	uint32_t saadc_sample_addr = nrf_saadc_task_address_get(
-		NRF_SAADC, NRF_SAADC_TASK_SAMPLE);
-	uint32_t saadc_end_addr = nrf_saadc_event_address_get(
-		NRF_SAADC, NRF_SAADC_EVENT_END);
-	uint32_t saadc_start_addr = nrf_saadc_task_address_get(
-		NRF_SAADC, NRF_SAADC_TASK_START);
-
-	LOG_INF("DPPI endpoints:");
-	LOG_INF("  TIMER22 COMPARE[0]: 0x%08x", timer_compare_addr);
-	LOG_INF("  SAADC SAMPLE:       0x%08x", saadc_sample_addr);
-	LOG_INF("  SAADC END:          0x%08x", saadc_end_addr);
-	LOG_INF("  SAADC START:        0x%08x", saadc_start_addr);
-
-	/* Connection 1: TIMER COMPARE -> SAADC SAMPLE */
-	err = nrfx_gppi_conn_alloc(timer_compare_addr, saadc_sample_addr,
-				   &gppi_sample_handle);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("GPPI alloc (TIMER->SAADC SAMPLE) failed: 0x%08x", err);
-		return -EIO;
-	}
-	nrfx_gppi_conn_enable(gppi_sample_handle);
-	LOG_INF("DPPI: TIMER22 COMPARE[0] -> SAADC SAMPLE (handle %d)",
-		gppi_sample_handle);
-
-	/* Connection 2: SAADC END -> SAADC START (continuous operation) */
-	err = nrfx_gppi_conn_alloc(saadc_end_addr, saadc_start_addr,
-				   &gppi_start_handle);
-	if (err != NRFX_SUCCESS) {
-		LOG_ERR("GPPI alloc (SAADC END->START) failed: 0x%08x", err);
-		return -EIO;
-	}
-	nrfx_gppi_conn_enable(gppi_start_handle);
-	LOG_INF("DPPI: SAADC END -> SAADC START (handle %d)",
-		gppi_start_handle);
+	/* TODO 3: Wire peripherals together using DPPI
+	 *
+	 * a) Get the 4 endpoint addresses:
+	 *    - TIMER22 COMPARE[0] event:
+	 *      nrfx_timer_compare_event_address_get(&timer_instance, NRF_TIMER_CC_CHANNEL0)
+	 *    - SAADC SAMPLE task:
+	 *      nrf_saadc_task_address_get(NRF_SAADC, NRF_SAADC_TASK_SAMPLE)
+	 *    - SAADC END event:
+	 *      nrf_saadc_event_address_get(NRF_SAADC, NRF_SAADC_EVENT_END)
+	 *    - SAADC START task:
+	 *      nrf_saadc_task_address_get(NRF_SAADC, NRF_SAADC_TASK_START)
+	 *
+	 * b) Connection 1 — TIMER COMPARE -> SAADC SAMPLE (triggers each sample):
+	 *    nrfx_gppi_conn_alloc(timer_compare_addr, saadc_sample_addr,
+	 *                         &gppi_sample_handle);
+	 *    nrfx_gppi_conn_enable(gppi_sample_handle);
+	 *
+	 * c) Connection 2 — SAADC END -> SAADC START (continuous operation):
+	 *    nrfx_gppi_conn_alloc(saadc_end_addr, saadc_start_addr,
+	 *                         &gppi_start_handle);
+	 *    nrfx_gppi_conn_enable(gppi_start_handle);
+	 */
 
 	return 0;
 }
@@ -316,7 +253,6 @@ int main(void)
 
 	LOG_INF("==========================================");
 	LOG_INF("Phase 3: TIMER + DPPI -> SAADC");
-	LOG_INF("(Based on Nordic Academy L6 Exercise 3)");
 	LOG_INF("==========================================");
 	LOG_INF("Sample rate: %d Hz (%d us interval)",
 		1000000 / SAMPLE_INTERVAL_US, SAMPLE_INTERVAL_US);
@@ -344,18 +280,12 @@ int main(void)
 		return err;
 	}
 
-	/* Start the autonomous sampling chain:
-	 * 1. Trigger SAADC to enter ready state
-	 * 2. Enable TIMER to start generating COMPARE events
-	 * From here, everything runs in hardware until we stop it.
+	/* TODO 4: Start the autonomous sampling chain
+	 *
+	 * Call nrfx_saadc_mode_trigger() to put the SAADC into ready state.
+	 * This will fire EVT_READY in saadc_handler(), which starts the TIMER.
+	 * From there, everything runs in hardware.
 	 */
-	nrfx_err_t nrfx_err = nrfx_saadc_mode_trigger();
-	if (nrfx_err != NRFX_SUCCESS) {
-		LOG_ERR("SAADC mode trigger failed: 0x%08x", nrfx_err);
-		return -EIO;
-	}
-
-	nrfx_timer_enable(&timer_instance);
 
 	LOG_INF("");
 	LOG_INF("Autonomous sampling started!");
