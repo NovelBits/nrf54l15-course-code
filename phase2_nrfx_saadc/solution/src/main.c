@@ -22,7 +22,7 @@ LOG_MODULE_REGISTER(phase2_saadc, LOG_LEVEL_INF);
 #define SAMPLE_INTERVAL_MS  (1000 / SAMPLE_RATE_HZ)
 
 /* P1.11 = AIN4 on nRF54L15 */
-#define PULSE_SENSOR_PIN    NRF_PIN_PORT_TO_PIN_NUMBER(1U, 11)
+#define PULSE_SENSOR_PIN    NRF_PIN_PORT_TO_PIN_NUMBER(11U, 1)
 
 /* Sample buffer */
 static nrf_saadc_value_t sample_buffer[1];
