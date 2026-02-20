@@ -1,0 +1,10 @@
+/*
+ * Devicetree overlay for Phase 2 - nrfx SAADC
+ *
+ * Note: When using nrfx directly, we don't need the zephyr,user node
+ * but we keep the ADC enabled for the nrfx driver to work.
+ */
+
+&adc {
+    status = "okay";
+};

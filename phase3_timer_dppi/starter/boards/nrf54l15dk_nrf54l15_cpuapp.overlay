@@ -1,0 +1,10 @@
+/*
+ * Devicetree overlay for Phase 3 - TIMER + DPPI -> SAADC
+ *
+ * Configure SAADC for pulse sensor on AIN4 (P1.11)
+ * TIMER COMPARE events trigger SAADC sampling via DPPI
+ */
+
+&adc {
+	status = "okay";
+};

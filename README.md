@@ -1,0 +1,92 @@
+# nRF54L15 Heart Rate Monitor - Course Code
+
+Code samples for the **nRF54L15 Heart Rate Monitor** course from [Novel Bits Academy](https://academy.novelbits.io).
+
+## Repository Structure
+
+Each phase includes:
+- **`starter/`** - Starting template for the lesson
+- **`solution/`** - Complete working solution
+
+```
+nrf54l15-course-code/
+├── phase0_raw_adc/          # Module 2 - Reading the Pulse Sensor
+│   ├── starter/
+│   └── solution/
+├── phase1_bpm_detection/    # Module 3 - Detecting Heartbeats
+│   ├── starter/
+│   └── solution/
+├── phase2_nrfx_saadc/       # Module 4 - Direct Hardware Control (nrfx)
+│   ├── starter/
+│   └── solution/
+├── phase3_timer_dppi/       # Module 4 - Autonomous Sampling (TIMER+DPPI)
+│   ├── starter/
+│   └── solution/
+└── lib/
+    └── pulse_sensor/        # Shared PulseSensor library
+```
+
+## Hardware Requirements
+
+- **nRF54L15 DK** (PCA10156)
+- **PulseSensor** (https://pulsesensor.com)
+- **3 jumper wires**
+
+## Wiring
+
+| PulseSensor Pin | nRF54L15 DK Pin |
+|-----------------|-----------------|
+| Signal (Purple) | P1.11 (AIN4)    |
+| VCC (Red)       | 3.3V            |
+| GND (Black)     | GND             |
+
+## Software Requirements
+
+- **nRF Connect SDK** v2.9.0 or later
+- **Segger J-Link** drivers
+- **VS Code** with nRF Connect extension (recommended)
+
+## How to Use
+
+### Option 1: Download ZIP
+1. Click the green **Code** button above
+2. Select **Download ZIP**
+3. Extract to your workspace
+
+### Option 2: Clone with Git
+```bash
+git clone https://github.com/NovelBits/nrf54l15-course-code.git
+cd nrf54l15-course-code
+```
+
+### Build and Flash
+
+Each phase is a complete Zephyr application:
+
+```bash
+# Navigate to solution (or starter)
+cd phase0_raw_adc/solution
+
+# Build
+west build -b nrf54l15dk/nrf54l15/cpuapp
+
+# Flash
+west flash
+
+# View logs (RTT)
+west log
+```
+
+## Course Access
+
+This repository is part of the **nRF54L15 Heart Rate Monitor** course.
+
+Enroll at: **https://academy.novelbits.io**
+
+## Support
+
+Questions about the course? Email: support@novelbits.io
+
+---
+
+© 2026 Novel Bits LLC. All rights reserved.

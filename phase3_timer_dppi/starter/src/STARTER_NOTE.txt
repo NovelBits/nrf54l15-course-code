@@ -1,0 +1,14 @@
+PHASE 3 STARTER TEMPLATE
+
+This is an advanced phase. The starter template includes:
+- Basic project structure
+- Necessary includes and configuration files
+
+Key implementation tasks:
+1. Configure TIMER22 for periodic interrupts (500 Hz)
+2. Set up DPPI channel to connect TIMER to SAADC
+3. Configure nrfx SAADC for hardware-triggered sampling
+4. Handle SAADC completion events
+
+Refer to the solution for complete implementation.
+Students should attempt Phases 0-2 before tackling this phase.

@@ -1,0 +1,21 @@
+# Zephyr build artifacts
+build/
+build-*/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
