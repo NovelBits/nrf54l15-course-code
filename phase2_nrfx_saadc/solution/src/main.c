@@ -21,8 +21,12 @@ LOG_MODULE_REGISTER(phase2_saadc, LOG_LEVEL_INF);
 #define SAMPLE_RATE_HZ      50
 #define SAMPLE_INTERVAL_MS  (1000 / SAMPLE_RATE_HZ)
 
-/* P1.11 = AIN4 on nRF54L15 */
-#define PULSE_SENSOR_PIN    NRF_PIN_PORT_TO_PIN_NUMBER(11U, 1)
+/* nRF54L15 uses NRFX_ANALOG_EXTERNAL_AIN* for analog inputs */
+#if NRF_SAADC_HAS_AIN_AS_PIN
+#define SAADC_INPUT_PIN  NRFX_ANALOG_EXTERNAL_AIN4  /* P1.11 on nRF54L15 DK */
+#else
+#define SAADC_INPUT_PIN  NRF_SAADC_INPUT_AIN4
+#endif
 
 /* Sample buffer */
 static nrf_saadc_value_t sample_buffer[1];
@@ -59,21 +63,9 @@ int main(void)
     }
     LOG_INF("SAADC initialized");
 
-    /* Channel configuration for AIN4 (P1.11) */
-    nrfx_saadc_channel_t channel = {
-        .channel_config = {
-            .resistor_p = NRF_SAADC_RESISTOR_DISABLED,
-            .resistor_n = NRF_SAADC_RESISTOR_DISABLED,
-            .gain = NRF_SAADC_GAIN1_4,
-            .reference = NRF_SAADC_REFERENCE_INTERNAL,
-            .acq_time = NRF_SAADC_ACQTIME_10US,
-            .mode = NRF_SAADC_MODE_SINGLE_ENDED,
-            .burst = NRF_SAADC_BURST_DISABLED,
-        },
-        .pin_p = (nrf_saadc_input_t)PULSE_SENSOR_PIN,
-        .pin_n = NRF_SAADC_INPUT_DISABLED,
-        .channel_index = 0,
-    };
+    /* Channel configuration for AIN4 (P1.11) using default macro */
+    nrfx_saadc_channel_t channel = NRFX_SAADC_DEFAULT_CHANNEL_SE(SAADC_INPUT_PIN, 0);
+    channel.channel_config.gain = NRF_SAADC_GAIN1_4;
 
     err = nrfx_saadc_channels_config(&channel, 1);
     if (err != NRFX_SUCCESS) {

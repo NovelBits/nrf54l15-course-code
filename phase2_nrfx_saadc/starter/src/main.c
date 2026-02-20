@@ -21,8 +21,12 @@ LOG_MODULE_REGISTER(phase2_saadc, LOG_LEVEL_INF);
 #define SAMPLE_RATE_HZ      50
 #define SAMPLE_INTERVAL_MS  (1000 / SAMPLE_RATE_HZ)
 
-/* P1.11 = AIN4 on nRF54L15 */
-#define PULSE_SENSOR_PIN    NRF_PIN_PORT_TO_PIN_NUMBER(11U, 1)
+/* nRF54L15 uses NRFX_ANALOG_EXTERNAL_AIN* for analog inputs */
+#if NRF_SAADC_HAS_AIN_AS_PIN
+#define SAADC_INPUT_PIN  NRFX_ANALOG_EXTERNAL_AIN4  /* P1.11 on nRF54L15 DK */
+#else
+#define SAADC_INPUT_PIN  NRF_SAADC_INPUT_AIN4
+#endif
 
 /* Sample buffer */
 static nrf_saadc_value_t sample_buffer[1];
@@ -56,12 +60,9 @@ int main(void)
      */
 
     /* TODO 2: Configure SAADC channel for AIN4 (P1.11)
-     * Hint: Create nrfx_saadc_channel_t struct with:
-     * - Gain: NRF_SAADC_GAIN1_4
-     * - Reference: NRF_SAADC_REFERENCE_INTERNAL
-     * - Acquisition time: NRF_SAADC_ACQTIME_10US
-     * - Mode: NRF_SAADC_MODE_SINGLE_ENDED
-     * Then call nrfx_saadc_channels_config()
+     * Hint: Use NRFX_SAADC_DEFAULT_CHANNEL_SE(SAADC_INPUT_PIN, 0) to create
+     * a default single-ended channel config, then override the gain to
+     * NRF_SAADC_GAIN1_4. Then call nrfx_saadc_channels_config().
      */
 
     /* TODO 3: Configure simple mode
