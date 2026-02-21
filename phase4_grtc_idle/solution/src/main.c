@@ -181,10 +181,10 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
  * Fires when the GRTC CC channel reaches the scheduled value.
  * Transitions from IDLE to BURST_START.
  */
-static void grtc_compare_handler(int32_t id, uint32_t cc_channel, void *p_context)
+static void grtc_compare_handler(int32_t id, uint64_t cc_value, void *p_context)
 {
 	ARG_UNUSED(id);
-	ARG_UNUSED(cc_channel);
+	ARG_UNUSED(cc_value);
 	ARG_UNUSED(p_context);
 
 	if (current_state != STATE_IDLE) {
@@ -371,8 +371,13 @@ static int init_grtc(void)
 	nrfx_grtc_channel_callback_set(grtc_channel, grtc_compare_handler,
 				       NULL);
 
-	/* Prepare channel data struct for cc_relative_set */
+	/* Prepare channel data struct for cc_relative_set.
+	 * The handler must be set here — cc_channel_prepare() inside
+	 * nrfx_grtc_syscounter_cc_relative_set() copies it from this struct.
+	 */
 	grtc_chan_data.channel = grtc_channel;
+	grtc_chan_data.handler = grtc_compare_handler;
+	grtc_chan_data.p_context = NULL;
 
 	LOG_INF("GRTC initialized: CC channel %d allocated", grtc_channel);
 	return 0;
