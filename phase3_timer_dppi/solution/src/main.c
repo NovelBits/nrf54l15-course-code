@@ -50,7 +50,7 @@ LOG_MODULE_REGISTER(phase3_timer_dppi, LOG_LEVEL_INF);
 
 /* TIMER configuration - nRF54L15 uses TIMER22 */
 #define TIMER_INSTANCE_NUMBER   22
-static const nrfx_timer_t timer_instance = NRFX_TIMER_INSTANCE(TIMER_INSTANCE_NUMBER);
+static nrfx_timer_t timer_instance = NRFX_TIMER_INSTANCE(TIMER_INSTANCE_NUMBER);
 
 /* SAADC channel configuration */
 #define SAADC_CHANNEL           0

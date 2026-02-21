@@ -55,7 +55,7 @@ static volatile enum app_state current_state = STATE_ACTIVE;
 
 /* ──────────────── TIMER Configuration ──────────────── */
 #define TIMER_INSTANCE_NUMBER   22
-static const nrfx_timer_t timer_instance = NRFX_TIMER_INSTANCE(TIMER_INSTANCE_NUMBER);
+static nrfx_timer_t timer_instance = NRFX_TIMER_INSTANCE(TIMER_INSTANCE_NUMBER);
 
 /* ──────────────── SAADC Configuration ──────────────── */
 #define SAADC_CHANNEL           0
