@@ -25,6 +25,9 @@ nrf54l15-course-code/
 ├── phase4_grtc_idle/        # Module 5 - Idle Mode with GRTC (Burst Sampling)
 │   ├── starter/
 │   └── solution/
+├── phase5_ble_hrs/          # Module 6 - Bluetooth LE Heart Rate Monitor
+│   ├── starter/
+│   └── solution/
 └── lib/
     └── pulse_sensor/        # Shared PulseSensor library
 ```
