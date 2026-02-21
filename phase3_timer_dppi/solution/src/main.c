@@ -49,8 +49,11 @@ LOG_MODULE_REGISTER(phase3_timer_dppi, LOG_LEVEL_INF);
 #define BUFFER_COUNT            2       /* Double buffering */
 
 /* TIMER configuration - nRF54L15 uses TIMER22 */
-#define TIMER_INSTANCE_NUMBER   22
-static nrfx_timer_t timer_instance = NRFX_TIMER_INSTANCE(TIMER_INSTANCE_NUMBER);
+#define TIMER_INST_IDX          22
+static nrfx_timer_t timer_instance = NRFX_TIMER_INSTANCE(NRF_TIMER22);
+
+/* Define TIMER22 IRQ handler (required by nrfx 4.x) */
+NRFX_INSTANCE_IRQ_HANDLER_DEFINE(timer, TIMER_INST_IDX, &timer_instance);
 
 /* SAADC channel configuration */
 #define SAADC_CHANNEL           0

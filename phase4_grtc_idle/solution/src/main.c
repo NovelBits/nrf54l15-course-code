@@ -54,8 +54,11 @@ static volatile enum app_state current_state = STATE_ACTIVE;
 #define BURST_DURATION_MS       1000    /* 1 second burst */
 
 /* ──────────────── TIMER Configuration ──────────────── */
-#define TIMER_INSTANCE_NUMBER   22
-static nrfx_timer_t timer_instance = NRFX_TIMER_INSTANCE(TIMER_INSTANCE_NUMBER);
+#define TIMER_INST_IDX          22
+static nrfx_timer_t timer_instance = NRFX_TIMER_INSTANCE(NRF_TIMER22);
+
+/* Define TIMER22 IRQ handler (required by nrfx 4.x) */
+NRFX_INSTANCE_IRQ_HANDLER_DEFINE(timer, TIMER_INST_IDX, &timer_instance);
 
 /* ──────────────── SAADC Configuration ──────────────── */
 #define SAADC_CHANNEL           0
