@@ -1,6 +1,6 @@
-# nRF54L15 Heart Rate Monitor - Course Code
+# nRF54L15 Deep Dive - Course Code
 
-Code samples for the **nRF54L15 Heart Rate Monitor** course from [Novel Bits Academy](https://academy.novelbits.io).
+Code samples for the **nRF54L15 Deep Dive** course from [Novel Bits Academy](https://academy.novelbits.io).
 
 ## Repository Structure
 
@@ -76,12 +76,6 @@ Each phase is a complete Zephyr application. Use VS Code with the nRF Connect ex
 6. Connect your DK via USB
 7. Click **Flash** (lightning icon)
 8. View output in the **nRF Terminal** or your preferred serial terminal (115200 baud)
-
-## Course Access
-
-This repository is part of the **nRF54L15 Heart Rate Monitor** course.
-
-Enroll at: **https://academy.novelbits.io**
 
 ## Support
 
