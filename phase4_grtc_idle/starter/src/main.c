@@ -121,6 +121,14 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 		break;
 
 	case NRFX_SAADC_EVT_DONE: {
+		/* Ignore partial buffers from nrfx_saadc_abort() during
+		 * burst stop — the abort flushes the queued second buffer
+		 * with whatever samples it collected (typically 1-2).
+		 */
+		if (current_state == STATE_IDLE) {
+			break;
+		}
+
 		buffer_full_count++;
 
 		int32_t min_val = INT16_MAX;
