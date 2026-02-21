@@ -44,6 +44,7 @@
 #include <zephyr/bluetooth/uuid.h>
 #include <zephyr/bluetooth/gatt.h>
 #include <zephyr/bluetooth/services/hrs.h>
+#include <zephyr/settings/settings.h>
 
 /* BPM detection algorithm */
 #include "pulse_sensor.h"
@@ -146,10 +147,13 @@ static void adv_restart_handler(struct k_work *work)
  * Implement init_bluetooth() to:
  *   1. Initialize the work queue: k_work_init(&adv_restart_work, adv_restart_handler)
  *   2. Enable Bluetooth: bt_enable(NULL)
- *   3. Start advertising: bt_le_adv_start(BT_LE_ADV_CONN_FAST_1,
+ *   3. Load settings: settings_load()
+ *      (Required for persistent bonding/GATT cache — prevents
+ *       reconnection issues where the phone can't find services)
+ *   4. Start advertising: bt_le_adv_start(BT_LE_ADV_CONN_FAST_1,
  *                                         ad, ARRAY_SIZE(ad),
  *                                         sd, ARRAY_SIZE(sd))
- *   4. Return 0 on success, or the error code on failure
+ *   5. Return 0 on success, or the error code on failure
  *
  * Remember to log the result of each step for debugging.
  * ──────────────────────────────────────────────────────────── */
@@ -188,14 +192,19 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 		 * TODO 3: Process samples for BPM detection
 		 *
 		 * Loop through all samples in the buffer and feed each
-		 * one to the BPM detection algorithm:
+		 * one to the BPM detection algorithm. Track the latest
+		 * BPM and send ONE notification after the loop completes
+		 * (not on every beat — this prevents ATT TX buffer
+		 * exhaustion):
 		 *
+		 *   int latest_bpm = 0;
 		 *   for each sample in p_event->data.done.p_buffer:
 		 *     1. Call pulse_sensor_process(&pulse, sample)
 		 *     2. If it returns true (beat detected):
 		 *        a. Get BPM: pulse_sensor_get_bpm(&pulse)
-		 *        b. If BPM > 0, log it and send via BLE:
-		 *           bt_hrs_notify(bpm)
+		 *        b. If BPM > 0, log it and save to latest_bpm
+		 *   After the loop:
+		 *     if (latest_bpm > 0) bt_hrs_notify(latest_bpm);
 		 *
 		 * The buffer has p_event->data.done.size samples.
 		 * Each sample is an int16_t (12-bit ADC value).

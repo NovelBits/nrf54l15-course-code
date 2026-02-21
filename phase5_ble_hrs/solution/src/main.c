@@ -44,6 +44,7 @@
 #include <zephyr/bluetooth/uuid.h>
 #include <zephyr/bluetooth/gatt.h>
 #include <zephyr/bluetooth/services/hrs.h>
+#include <zephyr/settings/settings.h>
 
 /* BPM detection algorithm */
 #include "pulse_sensor.h"
@@ -167,6 +168,9 @@ static int init_bluetooth(void)
 		return err;
 	}
 
+	/* Load settings (required for persistent bonding/GATT cache) */
+	settings_load();
+
 	LOG_INF("Bluetooth initialized");
 
 	err = bt_le_adv_start(BT_LE_ADV_CONN_FAST_1, ad, ARRAY_SIZE(ad),
@@ -204,7 +208,12 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 		buffer_full_count++;
 		sample_count += p_event->data.done.size;
 
-		/* Process each sample through BPM detection algorithm */
+		/* Process each sample through BPM detection algorithm.
+		 * Track the latest BPM and send one notification per buffer
+		 * (1 Hz max) to avoid exhausting ATT TX buffers.
+		 */
+		int latest_bpm = 0;
+
 		for (uint16_t i = 0; i < p_event->data.done.size; i++) {
 			bool beat = pulse_sensor_process(
 				&pulse, p_event->data.done.p_buffer[i]);
@@ -212,9 +221,13 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 				int bpm = pulse_sensor_get_bpm(&pulse);
 				if (bpm > 0) {
 					LOG_INF("Beat detected! BPM: %d", bpm);
-					bt_hrs_notify(bpm);
+					latest_bpm = bpm;
 				}
 			}
+		}
+
+		if (latest_bpm > 0) {
+			bt_hrs_notify(latest_bpm);
 		}
 
 		/* Log buffer stats for debugging */
