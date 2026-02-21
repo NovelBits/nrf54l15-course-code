@@ -1,6 +1,6 @@
 # nRF54L15 Deep Dive - Course Code
 
-Code samples for the **nRF54L15 Deep Dive** course from [Novel Bits Academy](https://academy.novelbits.io).
+Code samples for the **nRF54L15 Deep Dive** course.
 
 ## Repository Structure
 
