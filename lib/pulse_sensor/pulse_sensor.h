@@ -61,7 +61,7 @@ typedef struct {
  * @param ps Pulse sensor state
  * @param threshold Initial threshold (typically 550 for 0-1023 range,
  *                  or 2200 for 0-4095 range)
- * @param sample_interval_ms Time between samples (typically 2ms for 500Hz)
+ * @param sample_interval_ms Time between samples (typically 5ms for 200Hz)
  */
 void pulse_sensor_init(pulse_sensor_t *ps, int threshold, int sample_interval_ms);
 
@@ -75,7 +75,7 @@ void pulse_sensor_reset(pulse_sensor_t *ps);
 
 /**
  * Process a new ADC sample
- * Call this at regular intervals (e.g., every 2ms)
+ * Call this at regular intervals (e.g., every 5ms)
  *
  * @param ps Pulse sensor state
  * @param sample ADC reading (0-4095 for 12-bit)

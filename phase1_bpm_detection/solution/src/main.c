@@ -23,8 +23,8 @@
 
 LOG_MODULE_REGISTER(pulse, LOG_LEVEL_INF);
 
-/* 500 Hz sampling required for beat detection algorithm */
-#define SAMPLE_INTERVAL_MS  2
+/* 200 Hz sampling for beat detection algorithm */
+#define SAMPLE_INTERVAL_MS  5
 
 /* Initial threshold for 12-bit ADC (algorithm will auto-adapt) */
 #define INITIAL_THRESHOLD   2200
