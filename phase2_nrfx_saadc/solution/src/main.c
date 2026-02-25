@@ -18,7 +18,7 @@
 
 LOG_MODULE_REGISTER(phase2_saadc, LOG_LEVEL_INF);
 
-#define SAMPLE_RATE_HZ      50
+#define SAMPLE_RATE_HZ      200
 #define SAMPLE_INTERVAL_MS  (1000 / SAMPLE_RATE_HZ)
 
 /* nRF54L15 uses NRFX_ANALOG_EXTERNAL_AIN* for analog inputs */
@@ -112,7 +112,7 @@ int main(void)
         sample_ready = false;
 
         /* Log the sample */
-        if (count % 10 == 0) {
+        if (count % 40 == 0) {
             LOG_INF("ADC: %d", sample_buffer[0]);
         }
         count++;

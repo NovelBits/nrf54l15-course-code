@@ -18,7 +18,7 @@
 
 LOG_MODULE_REGISTER(phase2_saadc, LOG_LEVEL_INF);
 
-#define SAMPLE_RATE_HZ      50
+#define SAMPLE_RATE_HZ      200
 #define SAMPLE_INTERVAL_MS  (1000 / SAMPLE_RATE_HZ)
 
 /* nRF54L15 uses NRFX_ANALOG_EXTERNAL_AIN* for analog inputs */
