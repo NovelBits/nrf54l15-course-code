@@ -75,7 +75,6 @@ static nrfx_gppi_handle_t gppi_start_handle;
 
 /* ──────────────── GRTC ──────────────── */
 static uint8_t grtc_channel;
-static nrfx_grtc_channel_t grtc_chan_data;
 
 /* ──────────────── Statistics ──────────────── */
 static volatile uint32_t buffer_full_count;
@@ -368,15 +367,7 @@ static int init_grtc(void)
 	 *                                          grtc_compare_handler, NULL)
 	 *      - Registers our ISR for when the compare fires
 	 *
-	 *   3. Populate the grtc_chan_data struct for schedule calls:
-	 *      grtc_chan_data.channel   = grtc_channel;
-	 *      grtc_chan_data.handler   = grtc_compare_handler;
-	 *      grtc_chan_data.p_context = NULL;
-	 *      NOTE: The handler MUST be set here because
-	 *      nrfx_grtc_syscounter_cc_relative_set() copies it
-	 *      from this struct on every call.
-	 *
-	 *   4. Log the allocated channel number
+	 *   3. Log the allocated channel number
 	 *
 	 * Return 0 on success, -EIO on failure.
 	 */
@@ -452,14 +443,13 @@ static void schedule_grtc_wakeup(void)
 {
 	/* TODO 2: Schedule the next GRTC wake-up
 	 *
-	 * Call nrfx_grtc_syscounter_cc_relative_set() with:
-	 *   - &grtc_chan_data         (channel data struct)
-	 *   - BURST_INTERVAL_US      (delay in microseconds)
-	 *   - true                   (enable interrupt)
+	 * Call nrfx_grtc_syscounter_cc_rel_set() with:
+	 *   - grtc_channel            (the allocated CC channel)
+	 *   - BURST_INTERVAL_US       (delay in microseconds)
 	 *   - NRFX_GRTC_CC_RELATIVE_SYSCOUNTER  (relative to current counter)
 	 *
-	 * Returns 0 on success. Log error on failure.
-	 * Also log the scheduled wake-up time for debugging.
+	 * This function returns void — no error checking needed.
+	 * Log the scheduled wake-up time for debugging.
 	 */
 }
 

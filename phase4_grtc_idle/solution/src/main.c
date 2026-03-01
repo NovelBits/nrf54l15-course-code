@@ -75,7 +75,6 @@ static nrfx_gppi_handle_t gppi_start_handle;
 
 /* ──────────────── GRTC ──────────────── */
 static uint8_t grtc_channel;
-static nrfx_grtc_channel_t grtc_chan_data;
 
 /* ──────────────── Statistics ──────────────── */
 static volatile uint32_t buffer_full_count;
@@ -379,14 +378,6 @@ static int init_grtc(void)
 	nrfx_grtc_channel_callback_set(grtc_channel, grtc_compare_handler,
 				       NULL);
 
-	/* Prepare channel data struct for cc_relative_set.
-	 * The handler must be set here — cc_channel_prepare() inside
-	 * nrfx_grtc_syscounter_cc_relative_set() copies it from this struct.
-	 */
-	grtc_chan_data.channel = grtc_channel;
-	grtc_chan_data.handler = grtc_compare_handler;
-	grtc_chan_data.p_context = NULL;
-
 	LOG_INF("GRTC initialized: CC channel %d allocated", grtc_channel);
 	return 0;
 }
@@ -464,20 +455,13 @@ static void stop_sampling_chain(void)
 /*
  * Schedule the next GRTC wake-up after BURST_INTERVAL_US microseconds.
  *
- * Uses nrfx_grtc_syscounter_cc_relative_set() which sets the CC value
- * relative to the current SYSCOUNTER and enables the interrupt.
+ * Uses nrfx_grtc_syscounter_cc_rel_set() which sets the CC value
+ * relative to the current SYSCOUNTER.
  */
 static void schedule_grtc_wakeup(void)
 {
-	int err;
-
-	err = nrfx_grtc_syscounter_cc_relative_set(&grtc_chan_data,
-						   BURST_INTERVAL_US, true,
-						   NRFX_GRTC_CC_RELATIVE_SYSCOUNTER);
-	if (err != 0) {
-		LOG_ERR("GRTC schedule failed: %d", err);
-		return;
-	}
+	nrfx_grtc_syscounter_cc_rel_set(grtc_channel, BURST_INTERVAL_US,
+					NRFX_GRTC_CC_RELATIVE_SYSCOUNTER);
 
 	LOG_INF("GRTC: next wake-up in %d ms",
 		BURST_INTERVAL_US / 1000);
