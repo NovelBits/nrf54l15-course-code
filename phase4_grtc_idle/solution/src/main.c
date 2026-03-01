@@ -39,7 +39,7 @@ enum app_state {
 	STATE_ACTIVE,          /* Continuous sampling (Phase 3 behavior) */
 	STATE_IDLE,            /* Sleeping, waiting for GRTC wake-up */
 	STATE_BURST_START,     /* GRTC fired, starting burst */
-	STATE_BURST_SAMPLING,  /* Burst in progress (1 sec) */
+	STATE_BURST_SAMPLING,  /* Burst in progress */
 };
 
 static volatile enum app_state current_state = STATE_ACTIVE;
@@ -50,8 +50,9 @@ static volatile enum app_state current_state = STATE_ACTIVE;
 #define BUFFER_COUNT            2       /* Double buffering */
 
 /* Burst / idle parameters */
-#define BURST_INTERVAL_US       5000000 /* 5 seconds between bursts */
-#define BURST_DURATION_MS       1000    /* 1 second burst */
+#define BURST_INTERVAL_US       20000000 /* 20 seconds between bursts */
+#define BURST_DURATION_MS       5000     /* 5 second burst */
+#define BURST_BUFFERS           (BURST_DURATION_MS / (BUFFER_SIZE * SAMPLE_INTERVAL_US / 1000))
 
 /* ──────────────── TIMER Configuration ──────────────── */
 #define TIMER_INST_IDX          22
@@ -79,6 +80,7 @@ static uint8_t grtc_channel;
 /* ──────────────── Statistics ──────────────── */
 static volatile uint32_t buffer_full_count;
 static volatile uint32_t burst_count;
+static volatile uint32_t burst_buffer_count;
 
 /* ──────────────── Sample Buffers ──────────────── */
 static int16_t sample_buffers[BUFFER_COUNT][BUFFER_SIZE];
@@ -162,17 +164,22 @@ static void saadc_handler(nrfx_saadc_evt_t const *p_event)
 			p_event->data.done.size, avg, avg_mv, min_val,
 			min_mv, max_val, max_mv);
 
-		/* In burst mode, stop after one buffer (1 sec of data) */
+		/* In burst mode, stop after BURST_BUFFERS buffers */
 		if (current_state == STATE_BURST_SAMPLING) {
-			stop_sampling_chain();
-			dk_set_led_off(DK_LED2);
-			burst_count++;
-			LOG_INF("Burst %d complete — returning to idle",
-				burst_count);
+			burst_buffer_count++;
+			if (burst_buffer_count >= BURST_BUFFERS) {
+				stop_sampling_chain();
+				dk_set_led_off(DK_LED2);
+				burst_count++;
+				LOG_INF("Burst %d complete (%d buffers) "
+					"— returning to idle",
+					burst_count, burst_buffer_count);
+				burst_buffer_count = 0;
 
-			/* Schedule next wake-up and go back to idle */
-			current_state = STATE_IDLE;
-			schedule_grtc_wakeup();
+				/* Schedule next wake-up and go back to idle */
+				current_state = STATE_IDLE;
+				schedule_grtc_wakeup();
+			}
 		}
 		break;
 	}
