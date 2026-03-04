@@ -29,7 +29,7 @@
  *              |
  *              +--> beat detected? --> bt_hrs_notify(bpm)
  *              |
- *              +--> nRF Connect Mobile shows BPM
+ *              +--> nRF Toolbox shows BPM
  *
  * Wiring:
  *   Pulse Sensor Signal (S) -> P1.11 (AIN4)
@@ -557,7 +557,7 @@ int main(void)
 
 	LOG_INF("");
 	LOG_INF("Heart rate monitor running!");
-	LOG_INF("Place finger on sensor and connect with nRF Connect Mobile");
+	LOG_INF("Place finger on sensor and connect with nRF Toolbox");
 	LOG_INF("");
 
 	/* Main loop — CPU sleeps between buffer interrupts.
