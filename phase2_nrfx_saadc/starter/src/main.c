@@ -93,7 +93,7 @@ int main(void)
          * c) Reset sample_ready to false
          *
          * d) Log the sample: LOG_INF("ADC: %d", sample_buffer[0])
-         *    (log every 10th sample to avoid flooding the console)
+         *    (log every 40th sample to avoid flooding the console)
          *
          * e) Re-arm the buffer with nrfx_saadc_buffer_set(sample_buffer, 1)
          *    This is required after every completed sample in simple mode.
