@@ -4,11 +4,11 @@
  * Demonstrates the Tamper Controller (TAMPC) active shield feature.
  * A PRBS signal is output on ASO[3] (P1.11) and sampled on ASI[3] (P1.12).
  * Connect P1.11 to P1.12 with a wire. Disconnecting the wire triggers a
- * tamper event (LED1 toggles, message logged).
+ * tamper event (LED0 toggles, message logged).
  *
  * Hardware setup:
  *   - Wire from P1.11 to P1.12 on the DK headers
- *   - LED1 (DK onboard) used for tamper indication
+ *   - LED0 (DK onboard) used for tamper indication
  *   - BTN0 (P1.13) resets the tamper counter
  *
  */
@@ -22,7 +22,7 @@
 
 LOG_MODULE_REGISTER(tampc_demo, LOG_LEVEL_INF);
 
-/* LED1 on nRF54L15 DK */
+/* LED0 on nRF54L15 DK */
 static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
 
 /* Button 0 (P1.13) — resets the tamper counter */
@@ -98,7 +98,7 @@ static int tampc_init(void)
 	LOG_INF("TAMPC STATUS cleared");
 
 	/*
-	 * Step 4: Enable the active shield detector (master enable)
+	 * Step 4: Enable the active shield and Channel 3
 	 *
 	 * PROTECT registers require the write key (0x50FA) and clearing
 	 * WRITEPROTECTION before writing VALUE. The HAL function handles this.
@@ -107,10 +107,6 @@ static int tampc_init(void)
 					   NRF_TAMPC_PROTECT_ACTIVE_SHIELD,
 					   true);
 	LOG_INF("Active shield detector enabled");
-
-	/*
-	 * Step 5: Enable Channel 3
-	 */
 	/* NRF_TAMPC_ACTIVESHIELD_CHANNEL_3_MASK is not defined for nRF54L15 by
 	 * the HAL (the device header doesn't pre-define the channel count macro
 	 * needed to unlock it in the enum). Use the raw MDK bit mask instead. */
@@ -119,7 +115,7 @@ static int tampc_init(void)
 	LOG_INF("Active shield Channel 3 enabled");
 
 	/*
-	 * Step 6: Enable TAMPER interrupt
+	 * Step 5: Enable the TAMPC interrupt
 	 */
 	nrf_tampc_int_enable(NRF_TAMPC, NRF_TAMPC_INT_TAMPER_MASK);
 

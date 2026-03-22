@@ -134,6 +134,36 @@ static void adv_restart_handler(struct k_work *work)
 }
 
 /* ────────────────────────────────────────────────────────────
+ * TODO 1: Add security callbacks
+ *
+ * Define two callback structs for SMP pairing:
+ *
+ *   1. Authentication callbacks (struct bt_conn_auth_cb):
+ *      .passkey_display - Display the 6-digit passkey on UART
+ *        void auth_passkey_display(struct bt_conn *conn,
+ *                                  unsigned int passkey)
+ *        Log the passkey so the user can enter it on their phone.
+ *        Format: LOG_INF("Passkey: %06u", passkey)
+ *
+ *      .cancel - Log that pairing was cancelled
+ *        void auth_cancel(struct bt_conn *conn)
+ *
+ *   2. Auth info callbacks (struct bt_conn_auth_info_cb):
+ *      .pairing_complete - Log success and whether bonding occurred
+ *        void pairing_complete(struct bt_conn *conn, bool bonded)
+ *
+ *      .pairing_failed - Log the failure reason
+ *        void pairing_failed(struct bt_conn *conn,
+ *                            enum bt_security_err reason)
+ *
+ * These callbacks let the firmware participate in the SMP
+ * pairing process. The passkey_display callback is essential —
+ * it shows the passkey the user must enter on their phone.
+ *
+ * Don't forget to enable CONFIG_BT_SMP in prj.conf (TODO 1 there).
+ * ──────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────
  * TODO 4: Add Filter Accept List and smart advertising
  *
  * Replace the simple advertising above with FAL-aware
@@ -165,36 +195,6 @@ static void adv_restart_handler(struct k_work *work)
  *
  * Don't forget to enable CONFIG_BT_FILTER_ACCEPT_LIST and
  * CONFIG_BT_PRIVACY in prj.conf (TODO 4 there too).
- * ──────────────────────────────────────────────────────────── */
-
-/* ────────────────────────────────────────────────────────────
- * TODO 1: Add security callbacks
- *
- * Define two callback structs for SMP pairing:
- *
- *   1. Authentication callbacks (struct bt_conn_auth_cb):
- *      .passkey_display - Display the 6-digit passkey on UART
- *        void auth_passkey_display(struct bt_conn *conn,
- *                                  unsigned int passkey)
- *        Log the passkey so the user can enter it on their phone.
- *        Format: LOG_INF("Passkey: %06u", passkey)
- *
- *      .cancel - Log that pairing was cancelled
- *        void auth_cancel(struct bt_conn *conn)
- *
- *   2. Auth info callbacks (struct bt_conn_auth_info_cb):
- *      .pairing_complete - Log success and whether bonding occurred
- *        void pairing_complete(struct bt_conn *conn, bool bonded)
- *
- *      .pairing_failed - Log the failure reason
- *        void pairing_failed(struct bt_conn *conn,
- *                            enum bt_security_err reason)
- *
- * These callbacks let the firmware participate in the SMP
- * pairing process. The passkey_display callback is essential —
- * it shows the passkey the user must enter on their phone.
- *
- * Don't forget to enable CONFIG_BT_SMP in prj.conf (TODO 1 there).
  * ──────────────────────────────────────────────────────────── */
 
 /* ──────────────────────────────────────────────
@@ -511,7 +511,7 @@ int main(void)
 	int err;
 
 	LOG_INF("==========================================");
-	LOG_INF("Phase 6: Secure BLE Heart Rate Monitor");
+	LOG_INF("Phase 6: Secure Bluetooth LE Heart Rate Monitor");
 	LOG_INF("==========================================");
 	LOG_INF("Sample rate: %d Hz (%d us interval)",
 		1000000 / SAMPLE_INTERVAL_US, SAMPLE_INTERVAL_US);

@@ -524,7 +524,7 @@ int main(void)
 	int err;
 
 	LOG_INF("==========================================");
-	LOG_INF("Phase 6: Secure BLE Heart Rate Monitor");
+	LOG_INF("Phase 6: Secure Bluetooth LE Heart Rate Monitor");
 	LOG_INF("==========================================");
 	LOG_INF("Sample rate: %d Hz (%d us interval)",
 		1000000 / SAMPLE_INTERVAL_US, SAMPLE_INTERVAL_US);
