@@ -40,7 +40,7 @@ static void tampc_irq_handler(const void *arg)
 		/* Clear latched STATUS bits (W1C) */
 		NRF_TAMPC->STATUS = NRF_TAMPC->STATUS;
 		tamper_count++;
-		gpio_pin_toggle_dt(&led);
+		gpio_pin_set_dt(&led, 1);
 	}
 
 	if (nrf_tampc_event_check(NRF_TAMPC, NRF_TAMPC_EVENT_WRITE_ERROR)) {
@@ -197,6 +197,7 @@ int main(void)
 			tamper_count = 0;
 			last_count = 0;
 			highlight = 0;
+			gpio_pin_set_dt(&led, 0);
 			draw_header();
 		}
 		btn_prev = btn_now;
