@@ -15,7 +15,7 @@
 
 LOG_MODULE_REGISTER(raw_adc, LOG_LEVEL_INF);
 
-#define SAMPLE_INTERVAL_MS  100  /* 10 Hz sample rate */
+#define SAMPLE_INTERVAL_MS  5  /* 200 Hz sample rate */
 
 #if !DT_NODE_EXISTS(DT_PATH(zephyr_user)) || \
     !DT_NODE_HAS_PROP(DT_PATH(zephyr_user), io_channels)
