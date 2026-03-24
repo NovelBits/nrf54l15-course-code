@@ -230,25 +230,6 @@ static int init_dppi(void)
 	return 0;
 }
 
-static void print_results(void)
-{
-	LOG_INF("==========================================");
-	LOG_INF("PHASE 3 TEST RESULTS");
-	LOG_INF("==========================================");
-	LOG_INF("Total samples collected: %d", sample_count);
-	LOG_INF("Buffers completed: %d", buffer_full_count);
-	LOG_INF("Expected buffers (10 sec): 10");
-	LOG_INF("");
-	LOG_INF("CPU wake-ups for sampling: 0 (TIMER SHORTS = hardware auto-reload)");
-	LOG_INF("CPU wake-ups for buffers:  %d (1 per second)", buffer_full_count);
-	LOG_INF("");
-
-	if (buffer_full_count >= 9 && buffer_full_count <= 11) {
-		LOG_INF("PASS: Autonomous sampling working correctly");
-	} else {
-		LOG_WRN("WARNING: Expected ~10 buffers, got %d", buffer_full_count);
-	}
-}
 
 int main(void)
 {
@@ -293,25 +274,10 @@ int main(void)
 	LOG_INF("");
 	LOG_INF("Autonomous sampling started!");
 	LOG_INF("CPU is now idle — hardware handles all sampling.");
-	LOG_INF("Running test for 10 seconds...");
 	LOG_INF("");
 
-	/* CPU sleeps here. Wakes only 1x/sec for buffer processing. */
-	k_msleep(10000);
-
-	/* Stop the hardware chain */
-	nrfx_timer_disable(&timer_instance);
-	nrfx_gppi_conn_disable(gppi_sample_handle);
-	nrfx_gppi_conn_disable(gppi_start_handle);
-	nrfx_saadc_abort();
-
-	print_results();
-
-	LOG_INF("");
-	LOG_INF("==========================================");
-	LOG_INF("Phase 3 test complete!");
-	LOG_INF("==========================================");
-
+	/* CPU sleeps here. Wakes only 1x/sec for buffer processing.
+	 * The TIMER22 + DPPI + SAADC chain runs continuously in hardware. */
 	while (1) {
 		k_msleep(1000);
 	}
