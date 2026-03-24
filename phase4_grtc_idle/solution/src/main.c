@@ -10,8 +10,8 @@
  *   TIMER22 + DPPI -> SAADC continuous 200 Hz (same as Phase 3)
  *
  * IDLE MODE:
- *   GRTC CC[n] fires every 5 sec -> CPU wakes
- *     -> Start TIMER22+DPPI (1 sec burst, 200 samples)
+ *   GRTC CC[n] fires every 20 sec -> CPU wakes
+ *     -> Start TIMER22+DPPI (5 sec burst, 1000 samples)
  *     -> Stop chain, process buffer
  *     -> Re-arm GRTC, go back to sleep
  *
@@ -530,7 +530,7 @@ int main(void)
 	/* Main loop: state machine runs via interrupts.
 	 * The CPU sleeps in k_msleep() and wakes only for:
 	 *   - SAADC buffer-full interrupts (1/sec in ACTIVE, 1/burst in IDLE)
-	 *   - GRTC compare interrupts (every 5 sec in IDLE)
+	 *   - GRTC compare interrupts (every 20 sec in IDLE)
 	 *   - Button interrupts
 	 */
 	while (1) {

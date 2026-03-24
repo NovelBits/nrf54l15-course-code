@@ -4,7 +4,7 @@
  * Demonstrates the Tamper Controller (TAMPC) active shield feature.
  * A PRBS signal is output on ASO[3] (P1.11) and sampled on ASI[3] (P1.12).
  * Connect P1.11 to P1.12 with a wire. Disconnecting the wire triggers a
- * tamper event (LED0 toggles, message logged).
+ * tamper event (LED0 turns on, message logged).
  *
  * Hardware setup:
  *   - Wire from P1.11 to P1.12 on the DK headers

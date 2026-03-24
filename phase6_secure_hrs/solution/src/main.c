@@ -1,5 +1,5 @@
 /*
- * Phase 6: Secure BLE Heart Rate Monitor
+ * Phase 6: Secure Bluetooth LE Heart Rate Monitor
  *
  * Adds Bluetooth LE security on top of the Phase 5 heart rate monitor:
  *   - SMP pairing with passkey display (LESC if supported)

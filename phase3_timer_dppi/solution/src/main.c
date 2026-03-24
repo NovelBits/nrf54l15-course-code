@@ -190,7 +190,7 @@ static int init_timer(void)
 /*
  * Initialize SAADC for hardware-triggered sampling
  *
- * Identical to Phase 4 GRTC version — the SAADC doesn't care
+ * The SAADC configuration here is reusable — the SAADC doesn't care
  * whether the trigger comes from TIMER or GRTC via DPPI.
  */
 static int init_saadc(void)

@@ -4,7 +4,7 @@
  * Combines three previous phases into a wireless heart rate monitor:
  *   - Phase 3: TIMER22 + DPPI -> SAADC autonomous sampling (200 Hz)
  *   - Phase 1: PulseSensor BPM detection algorithm
- *   - BLE: Heart Rate Service (0x180D) notifications
+ *   - Bluetooth LE: Heart Rate Service (0x180D) notifications
  *
  * Architecture:
  *   TIMER22 CC[0] fires every 5ms (200 Hz)

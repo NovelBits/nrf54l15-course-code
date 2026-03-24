@@ -35,7 +35,7 @@ int main(void)
     };
 
     LOG_INF("Phase 0: Raw ADC Reading");
-    LOG_INF("Sample rate: 10 Hz");
+    LOG_INF("Sample rate: 200 Hz");
 
     if (!adc_is_ready_dt(&adc_channel)) {
         LOG_ERR("ADC device not ready");
