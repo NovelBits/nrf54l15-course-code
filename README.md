@@ -1,6 +1,6 @@
 # nRF54L15 Deep Dive - Course Code
 
-Code samples for the **[nRF54L15 Deep Dive](https://academy.novelbits.io/courses/nrf54l15-deep-dive)** course on the Bluetooth Developer Academy.
+Code samples for the **[nRF54L15 Deep Dive](https://learn.novelbits.io/courses/nrf54l15-deep-dive)** course on the Bluetooth Developer Academy.
 
 ## Repository Structure
 
