@@ -121,14 +121,13 @@ static const struct bt_data sd[] = {
 
 /* Open advertising — any device can connect */
 #define BT_LE_ADV_CONN_NO_FILTER                                               \
-	BT_LE_ADV_PARAM(BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_ONE_TIME,  \
+	BT_LE_ADV_PARAM(BT_LE_ADV_OPT_CONN,                                  \
 			BT_GAP_ADV_FAST_INT_MIN_2,                            \
 			BT_GAP_ADV_FAST_INT_MAX_2, NULL)
 
 /* Filtered advertising — only bonded devices (in FAL) can connect */
 #define BT_LE_ADV_CONN_FILTER                                                  \
-	BT_LE_ADV_PARAM(BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_ONE_TIME | \
-			BT_LE_ADV_OPT_FILTER_CONN,                            \
+	BT_LE_ADV_PARAM(BT_LE_ADV_OPT_CONN | BT_LE_ADV_OPT_FILTER_CONN,     \
 			BT_GAP_ADV_FAST_INT_MIN_2,                            \
 			BT_GAP_ADV_FAST_INT_MAX_2, NULL)
 

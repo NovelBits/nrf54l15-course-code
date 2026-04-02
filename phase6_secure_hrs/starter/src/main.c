@@ -171,7 +171,7 @@ static void adv_restart_handler(struct k_work *work)
  *
  *   1. Define two advertising parameter sets:
  *      - BT_LE_ADV_CONN_NO_FILTER: open advertising (any device)
- *        Use BT_LE_ADV_OPT_CONNECTABLE | BT_LE_ADV_OPT_ONE_TIME
+ *        Use BT_LE_ADV_OPT_CONN
  *      - BT_LE_ADV_CONN_FILTER: filtered (bonded only)
  *        Add BT_LE_ADV_OPT_FILTER_CONN to restrict connections
  *
