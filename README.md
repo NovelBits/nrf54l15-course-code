@@ -1,6 +1,6 @@
 # nRF54L15 Deep Dive - Course Code
 
-Code samples for the **nRF54L15 Deep Dive** course.
+Code samples for the **[nRF54L15 Deep Dive](https://academy.novelbits.io/courses/nrf54l15-deep-dive)** course on the Bluetooth Developer Academy.
 
 ## Repository Structure
 
@@ -28,6 +28,11 @@ nrf54l15-course-code/
 ├── phase5_ble_hrs/          # Module 6 - Bluetooth LE Heart Rate Monitor
 │   ├── starter/
 │   └── solution/
+├── phase6_secure_hrs/       # Module 7 - Secure Bluetooth LE Heart Rate Monitor
+│   ├── starter/
+│   └── solution/
+├── tampc_demo/              # Module 7 - Physical Tamper Detection (TAMPC)
+│   └── src/
 └── lib/
     └── pulse_sensor/        # Shared PulseSensor library
 ```
