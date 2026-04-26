@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Pre-commit secret scan (Layer 2 of the secret-prevention defense).
+# See ~/.claude/SECRET-PREVENTION.md for the full layered rule.
+diff=$(git diff --cached --no-color)
+if [ -z "$diff" ]; then exit 0; fi
+echo "$diff" | gitleaks stdin --redact --no-banner -v
